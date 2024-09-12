@@ -216,37 +216,54 @@ class PythonMarksheet:
             print ("Going back to main menu")
             return (self.menulist())
         elif read_file.lower() == "y":
-            file_object = open("PythonMarksheet_2024_Semester1.txt", 'r')
-            for line in file_object:
-                data = line.strip().split(',')
+            file_name = input("What is the file name you want to upload? (E.g., file.txt)")
+            
+            if not file_name.lower().endswith('.txt'):
+                print("Error: Please provide a .txt file.")
+                return self.option6()
+            
+            try:
+                with open(file_name, 'r') as file_object:
+                    for line in file_object:
+                        data = line.strip().split(',')
 
-                studentID, student_name, test_1, assignment_1, test_2, assignment_2, final_exam = data
-                #above line is to assign data from file into variables
-                # Convert to appropriate data types from external file
-                studentID = str(studentID)
-                test_1 = int(test_1)
-                assignment_1 = int(assignment_1)
-                test_2 = int(test_2)
-                assignment_2 = int(assignment_2)
-                final_exam = int(final_exam)
+                        studentID, student_name, test_1, assignment_1, test_2, assignment_2, final_exam = data
+                        #above line is to assign data from file into variables
+                        # Convert to appropriate data types from external file
+                        studentID = str(studentID)
+                        test_1 = int(test_1)
+                        assignment_1 = int(assignment_1)
+                        test_2 = int(test_2)
+                        assignment_2 = int(assignment_2)
+                        final_exam = int(final_exam)
 
-                # Create a PythonMarksheet object
-                student = PythonMarksheet(studentID, student_name, test_1, assignment_1, test_2, assignment_2, final_exam)
+                        # Create a PythonMarksheet object
+                        student = PythonMarksheet(studentID, student_name, test_1, assignment_1, test_2, assignment_2, final_exam)
 
-                # Add to the dictionary
-                studentlist[studentID] = student
-            print ("File with student marksheet are uploaded.")
-            #go back to option2 so to print the entire list
-            return self.option2()
-        
+                        # Add to the dictionary
+                        studentlist[studentID] = student
+                    print ("File with student marksheet are uploaded.")
+                    #go back to option2 so to print the entire list
+                    return self.option2()
+
+            #add this to prevent any error
+            except FileNotFoundError:
+                print("Error: The file was not found.")
+                return self.option6()
+            except IOError:
+                print("Error: An Error occurred while trying to read the file.")
+                return self.option6()
+            except Exception:
+                print("An unexpected error occurred")
+                return self.option6()
+            
         else:
             print ("Your action is not valid")
             return self.option6()
-        
-
-         #save marks into external file
-            #need to see how to optimize it better for clarity
-    
+            
+            
+    #save marks into external file
+    #need to see how to optimize it better for clarity
     #save list into file
     def option7 (self):
         save_file = str(input("WARNING: Saving this file will override all student information. Do you still want to proceed? (Y/N)"))
@@ -255,14 +272,24 @@ class PythonMarksheet:
             return (self.menulist())
         
         elif save_file.lower() == "y":
-            file_object = open ("PythonMarksheet_2024_Semester1.txt", 'w')
-            for studentID, student in studentlist.items():
-                line = f"{student.studentID},{student.student_name},{student.test_1},{student.assignment_1},{student.test_2},{student.assignment_2},{student.final_exam}\n"
-                file_object.write(line)
+        #for user to choose the filename
+            filename = str(input("Enter the filename to save the student data (e.g., 'myfile.txt'): "))
 
-            file_object.close()
-            print ("File saved at your current directory")
-            return (self.menulist())
+            # Ensure the filename has a proper extension
+            if not filename.endswith('.txt'):
+                filename += '.txt'
+
+            try:
+                with open(filename, 'w') as file_object:
+                    for studentID, student in studentlist.items():
+                        line = f"{student.studentID},{student.student_name},{student.test_1},{student.assignment_1},{student.test_2},{student.assignment_2},{student.final_exam}\n"
+                        file_object.write(line)
+                print(f"File saved as '{filename}' in your current directory")
+        
+            except IOError:
+                print("An error occurred while saving the file")
+
+            return self.menulist()
     
         else:
             print ("Your action is not valid")
@@ -306,7 +333,6 @@ class PythonMarksheet:
             # Create the histogram for final marks
             plt.figure(figsize=(10, 6))
             plt.hist(final_marks, bins=20, color="blue", edgecolor="black", rwidth=1)
-
             plt.title('Histogram of Student Final Marks')
             plt.xlabel('Marks')
             plt.ylabel('Number of Students')
